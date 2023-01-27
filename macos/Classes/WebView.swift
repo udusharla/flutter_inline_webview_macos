@@ -11,14 +11,10 @@ import WebKit
 
 public class InAppWebViewMacos: WKWebView
 //, WKUIDelegate, WKNavigationDelegate,
-//  WKScriptMessageHandler
+, WKScriptMessageHandler
 {
 
-  public func userContentController(
-    _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
-  ) {
-    print(message)
-  }
+
 
   var windowId: Int64?
   var windowCreated = false
@@ -26,7 +22,19 @@ public class InAppWebViewMacos: WKWebView
   var currentOriginalUrl: URL?
 
   init(frame: CGRect, configuration: WKWebViewConfiguration, channel: FlutterMethodChannel?) {
+      
+
     super.init(frame: frame, configuration: configuration)
+    let userController:WKUserContentController = WKUserContentController()
+
+    // Add a script message handler for receiving  "buttonClicked" event notifications posted from the JS document using  window.webkit.messageHandlers.postMessageListener.postMessage(JSON.stringify({data})) script message
+    userController.add(self, name: "nativeListener")
+    // Configure the WKWebViewConfiguration instance with the WKUserContentController
+    configuration.userContentController = userController;
+    
+    self.configuration.preferences.javaScriptEnabled = true;
+    self.configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
+
     self.channel = channel
 //    uiDelegate = self
 //    navigationDelegate = self
@@ -59,7 +67,7 @@ public class InAppWebViewMacos: WKWebView
   public func loadUrl(urlRequest: URLRequest, allowingReadAccessTo: URL?) {
     let url = urlRequest.url!
 
-    if #available(iOS 9.0, *), let allowingReadAccessTo = allowingReadAccessTo,
+    if #available(iOS 9.0, macOS 10.0, *), let allowingReadAccessTo = allowingReadAccessTo,
       url.scheme == "file", allowingReadAccessTo.scheme == "file"
     {
       loadFileURL(url, allowingReadAccessTo: allowingReadAccessTo)
@@ -67,6 +75,20 @@ public class InAppWebViewMacos: WKWebView
       load(urlRequest)
      
     }
+  }
+
+  public func evaluateJavaScript(script: String) {
+      self.evaluateJavaScript(script)
+  }
+
+  public func userContentController(
+    _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
+  ) {
+    print(message)
+    let arguments: [String: Any?] = [
+      "message": message,
+    ]
+    self.channel?.invokeMethod("onMessageRecieved", arguments: arguments)
   }
 
   public func loadData(

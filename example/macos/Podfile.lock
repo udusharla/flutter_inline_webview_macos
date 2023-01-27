@@ -2,21 +2,28 @@ PODS:
   - flutter_inline_webview_macos (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - flutter_inline_webview_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_inline_webview_macos/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos`)
 
 EXTERNAL SOURCES:
   flutter_inline_webview_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_inline_webview_macos/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  path_provider_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos
 
 SPEC CHECKSUMS:
   flutter_inline_webview_macos: 9b18930061ac999316ed4838a20ef3cae57380f6
-  FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
+  path_provider_foundation: 779d6f57e23c1654d7bbc80538d9a445efb876cb
 
-PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+PODFILE CHECKSUM: a884f6dd3f7494f3892ee6c81feea3a3abbf9153
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

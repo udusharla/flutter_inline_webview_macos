@@ -161,6 +161,12 @@ class InlineWebViewMacOsController {
     await _channel.invokeMethod<void>('loadUrl', args);
   }
 
+  Future<void> evaluateJavaScript(String script) async {
+    final args = defaultArgs
+      ..update('script', (_) => script, ifAbsent: () => script);
+    await _channel.invokeMethod<void>('evaluateJavaScript', args);
+  }
+
   ///Reloads the WebView.
   ///
   ///**Supported Platforms/Implementations**:

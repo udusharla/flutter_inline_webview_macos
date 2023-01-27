@@ -17,6 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  path_provider: ^2.0.8
 
   flutter_inline_webview_macos:
     # When depending on this package from a real application you should use:
@@ -82,3 +83,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  assets:
+    - assets/index.html
+    - assets/script.js
+    - assets/sample.jpeg

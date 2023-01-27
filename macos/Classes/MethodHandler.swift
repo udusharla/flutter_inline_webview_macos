@@ -69,6 +69,10 @@ public class InAppWebViewMacosMethodHandler: FlutterMethodCallDelegate {
 
     result(true)
 
+    case "evaluateJavaScript":
+      controller!.webView!.evaluateJavaScript(script: arguments!["script"] as! String)
+      result(true)
+
     case "getUrl":
       let url = controller!.webView!.getOriginalUrl()
       result(url?.baseURL)
