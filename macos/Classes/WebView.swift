@@ -11,7 +11,6 @@ import WebKit
 
 public class InAppWebViewMacos: WKWebView
 //, WKUIDelegate, WKNavigationDelegate,
-, WKScriptMessageHandler
 {
 
 
@@ -21,25 +20,16 @@ public class InAppWebViewMacos: WKWebView
   var channel: FlutterMethodChannel?
   var currentOriginalUrl: URL?
 
-  init(frame: CGRect, configuration: WKWebViewConfiguration, channel: FlutterMethodChannel?) {
+    init(frame: CGRect, configuration: WKWebViewConfiguration, channel: FlutterMethodChannel?) {
       
 
-    super.init(frame: frame, configuration: configuration)
-    let userController:WKUserContentController = WKUserContentController()
-
-    // Add a script message handler for receiving  "buttonClicked" event notifications posted from the JS document using  window.webkit.messageHandlers.postMessageListener.postMessage(JSON.stringify({data})) script message
-    userController.add(self, name: "nativeListener")
-    // Configure the WKWebViewConfiguration instance with the WKUserContentController
-    configuration.userContentController = userController;
+      super.init(frame: frame, configuration: configuration)
     
-    self.configuration.preferences.javaScriptEnabled = true;
-    self.configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
-
-    self.channel = channel
+      self.channel = channel
 //    uiDelegate = self
 //    navigationDelegate = self
   }
-
+    
   required public init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)!
   }
@@ -81,15 +71,6 @@ public class InAppWebViewMacos: WKWebView
       self.evaluateJavaScript(script)
   }
 
-  public func userContentController(
-    _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
-  ) {
-    print(message)
-    let arguments: [String: Any?] = [
-      "message": message,
-    ]
-    self.channel?.invokeMethod("onMessageRecieved", arguments: arguments)
-  }
 
   public func loadData(
     data: String, mimeType: String, encoding: String, baseUrl: URL, allowingReadAccessTo: URL?

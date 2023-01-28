@@ -10,13 +10,14 @@ import FlutterMacOS
 import Foundation
 import WebKit
 
-public class FlutterWebViewMacosController: NSView {
+public class FlutterWebViewMacosController: NSView, WKScriptMessageHandler {
 
   private weak var registrar: FlutterPluginRegistrar?
 
   var webView: InAppWebViewMacos?
   var viewId: Any = 0
   var channel: FlutterMethodChannel?
+  var viewChannel: FlutterMethodChannel?
   var methodCallDelegate: InAppWebViewMacosMethodHandler?
 
   init(
@@ -31,6 +32,11 @@ public class FlutterWebViewMacosController: NSView {
       name: "dev.akaboshinit/flutter_inline_webview_macos_controller_"
         + String(describing: viewId),
       binaryMessenger: registrar.messenger)
+      
+    viewChannel = FlutterMethodChannel(
+        name: "dev.akaboshinit/flutter_inline_webview_macos_view_"
+          + String(describing: viewId),
+        binaryMessenger: registrar.messenger)
 
     methodCallDelegate = InAppWebViewMacosMethodHandler(controller: self)
     channel!.setMethodCallHandler(methodCallDelegate!.handle)
@@ -39,13 +45,25 @@ public class FlutterWebViewMacosController: NSView {
   required init?(coder: NSCoder) {
     super.init(coder: coder)
   }
+    
+    public func userContentController(
+      _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
+    ) {
+        let arguments: [String: Any?] = [
+          "message": message.body as? String,
+        ]
+        print(message.body)
+        self.viewChannel?.invokeMethod("onMessageRecieved", arguments: arguments)
+    }
 
   func create(frame: CGRect) {
       let semaphore = DispatchSemaphore(value: 0)
+      let configuration = WKWebViewConfiguration()
+      
       func setWebView() {
           webView = InAppWebViewMacos(
             frame: frame,
-            configuration: WKWebViewConfiguration(),
+            configuration: configuration,
             channel: channel!
           )
 
@@ -54,7 +72,11 @@ public class FlutterWebViewMacosController: NSView {
 
       setWebView()
       semaphore.wait()
-
+      
+      webView!.configuration.userContentController.add(self, name: "nativeListener")
+      webView!.configuration.preferences.javaScriptEnabled = true
+      webView!.configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
+      
       methodCallDelegate = InAppWebViewMacosMethodHandler(controller: self)
       channel!.setMethodCallHandler(methodCallDelegate!.handle)
 

@@ -25,11 +25,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _flutterWebviewMacosPlugin = FlutterInlineWebviewMacos();
-  bool _ready = true;
-  String _event = "";
-  MethodChannel platform = const MethodChannel('flutter_inline_webview_macos');
+  static const platform = const MethodChannel(
+      'dev.akaboshinit/flutter_inline_webview_macos_view_0');
+  String _message = '';
 
   InlineWebViewMacOsController? _controller;
 
@@ -38,17 +37,18 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
     //loadFiles();
-    platform.setMethodCallHandler((MethodCall call) async {
-      log("init state setMethodCallHandler ${call.method}");
+    platform.setMethodCallHandler((call) async {
+      print("init state setMethodCallHandler ${call.method}");
+
+      setState(() {
+        _message = call.arguments["message"] as String;
+      });
     });
   }
 
   Future<void> loadFiles() async {
     await FileService.loadFileToTemp(
         ['index.html', 'script.js', 'sample.jpeg']);
-    setState(() {
-      _ready = true;
-    });
   }
 
   Future<void> initPlatformState() async {
@@ -61,10 +61,6 @@ class _MyAppState extends State<MyApp> {
     }
 
     if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -76,8 +72,6 @@ class _MyAppState extends State<MyApp> {
     void sendEvent(String eventName, {dynamic data}) {
       var script = "document.dispatchEvent(new CustomEvent('$eventName'))";
       _controller!.evaluateJavaScript(script);
-
-      setState(() => _event = script);
     }
 
     return MaterialApp(
@@ -85,27 +79,34 @@ class _MyAppState extends State<MyApp> {
         appBar: appBar,
         body: Column(
           children: [
-            if (_ready)
-              Center(
-                child: InlineWebViewMacOs(
-                  key: widget.key,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height -
-                      appBar.preferredSize.height -
-                      200,
-                  onWebViewCreated: (controller) async {
-                    _controller = controller;
-                    var url =
-                        "/Users/udusharl/Project/angular-epub-reader/dist/angular-epub-reader";
-                    url = "file://$url/index.html";
-                    var uri = Uri.parse(url);
+            Center(
+              child: InlineWebViewMacOs(
+                key: widget.key,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height -
+                    appBar.preferredSize.height -
+                    200,
+                onWebViewCreated:
+                    (InlineWebViewMacOsController controller) async {
+                  _controller = controller;
+                  var url =
+                      "/Users/udusharl/Project/angular-epub-reader/dist/angular-epub-reader";
+                  url = "file://$url/index.html";
+                  var uri = Uri.parse(url);
+
+                  Timer(Duration(milliseconds: 500), () {
                     _controller!.loadUrl(
                       urlRequest: URLRequest(url: uri),
                       allowingReadAccessTo: Uri.parse("file://$url/index.html"),
                     );
-                  },
-                ),
+                  });
+                },
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Text(_message ?? ''),
+            ),
           ],
         ),
         bottomNavigationBar: Container(
@@ -124,22 +125,24 @@ class _MyAppState extends State<MyApp> {
               )
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.navigate_before),
-                onPressed: () {
-                  sendEvent('navigation.prev', data: 'prev');
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.navigate_next),
-                onPressed: () {
-                  sendEvent('navigation.next', data: 'next');
-                },
-              )
-            ],
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.navigate_before),
+                  onPressed: () {
+                    sendEvent('navigation.prev', data: 'prev');
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.navigate_next),
+                  onPressed: () {
+                    sendEvent('navigation.next', data: 'next');
+                  },
+                )
+              ],
+            ),
           ),
         ),
       ),
