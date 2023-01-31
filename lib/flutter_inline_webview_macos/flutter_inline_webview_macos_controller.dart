@@ -9,7 +9,7 @@ class InlineWebViewMacOsController {
     required WebView webView,
     required Size size,
   }) {
-    _id = id;
+    this.id = id;
     _channel = MethodChannel(
       'dev.akaboshinit/flutter_inline_webview_macos_controller_$id',
     );
@@ -23,7 +23,7 @@ class InlineWebViewMacOsController {
   WebView? _webView;
   late MethodChannel _channel;
   // ignore: unused_field
-  dynamic _id;
+  dynamic id;
   late Size _size;
 
   Future<void> _init() async {
